@@ -1,8 +1,20 @@
 const fs = require('fs');
 
 const tours = JSON.parse(
-    fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`) //Ce fichier est seulement lu lorsque le serveur démarre. Une fois qu'on sauvegarde une modification dans tours-simple.json, cela va redémarrer le serveur
-  );
+  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`) //Ce fichier est seulement lu lorsque le serveur démarre. Une fois qu'on sauvegarde une modification dans tours-simple.json, cela va redémarrer le serveur
+);
+
+exports.checkID = (req, res, next, val) => {
+  console.log(`Tour id is: ${val}`); //Une fois la requête GET sur un tour réalisé , il va afficher dans le terminal VSC l'information Tour id is: 2
+  if (req.params.id * 1 > tours.length) {
+    // On convertit req.params.id en nombre (* 1 est un raccourci pour forcer le type).
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID',
+    });
+  }
+  next();
+};
 
 exports.getAllTours = (req, res) => {
   console.log(req.requestTime);
@@ -22,12 +34,6 @@ exports.getTour = (req, res) => {
   const id = req.params.id * 1; // * 1 car il va automatiquement convertir l'id en nombre tricks
   const tour = tours.find((el) => el.id === id);
 
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
   res.status(200).json({
     status: 'success',
     data: {
@@ -57,14 +63,7 @@ exports.createTour = (req, res) => {
 };
 
 exports.updateTour = (req, res) => {
-  //:id est un paramètre de route dynamique.
-  if (req.params.id * 1 > tours.length) {
-    // On convertit req.params.id en nombre (* 1 est un raccourci pour forcer le type).
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -74,14 +73,6 @@ exports.updateTour = (req, res) => {
 };
 
 exports.deleteTour = (req, res) => {
-  //:id est un paramètre de route dynamique.
-  if (req.params.id * 1 > tours.length) {
-    // On convertit req.params.id en nombre (* 1 est un raccourci pour forcer le type).
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
   res.status(204).json({
     status: 'success',
     data: null,
