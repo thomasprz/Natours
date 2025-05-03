@@ -1,27 +1,30 @@
-const fs = require("fs");
-const express = require("express");
+const express = require('express');
+const morgan = require('morgan');
+
+const tourRouter = require('./routes/tourRoutes')
+const userRouter = require('./routes/userRoutes')
+
 const app = express();
 
+// =======================
+// 1) MIDDLEWARES
+// =======================
+app.use(morgan('dev'));
 app.use(express.json());
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-);
-app.get("/api/v1/tours", (req, res) => {
-  console.log(req.body);
-  res.send("Done");
+app.use((req, res, next) => {
+  console.log('Hello from the middleware');
+  next();
+});
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
 });
 
-app.post("/api/v1/tours/", (req, res) => {
-  res.status(210).json({
-    status: "success",
-    data: {
-      tours,
-    },
-  });
-});
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
-const port = 3000;
-app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
-});
+// =======================
+// 4) START SERVER
+// =======================
+module.exports = app;
